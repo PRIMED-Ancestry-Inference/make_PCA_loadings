@@ -1,0 +1,14 @@
+version: 1.2
+workflows:
+  - subclass: WDL
+    name: create_ref_loadings
+    primaryDescriptorPath: /create_ref_loadings.wdl
+    authors:
+      - orcid: 0000-0002-7980-5420
+  - subclass: WDL
+    name: projected_PCA
+    primaryDescriptorPath: /projected_pca.wdl
+    authors: 
+      - orcid: 0000-00020-7989-5420
+    testParameterFiles:
+      - /projected_pca.wdl
