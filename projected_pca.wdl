@@ -6,6 +6,7 @@ task prepareFiles {
 		File bed
 		File bim
 		File fam
+		Double? overlap
 		Int mem_gb = 8
 	}
 
@@ -34,18 +35,24 @@ task prepareFiles {
     #doing this calculation because I'm lousy at bash...
     prop=$(awk -v old=${loadings_count} -v new=${new_loadings_count} '{prop=new/old; print prop}' )
     printf "Variant overlap is ${prop} of original.\n"
-    exit_code=$(awk -v prop=${prop} '{myexit=1; if(prop < 0.95){myexit=0}; print myexit }' )
+    $https://support.terra.bio/hc/en-us/articles/360037484851-Variable-Types-in-WDL#:~:text=When%20working%20with%20optional%20variables%20in%20your%20command%2C,The%20syntax%20for%20that%20is%3A%20%24%20%7Bdefault%3D%22value%22%20variableName%7D
+    myoverlap=${default=0.95 overlap}
+    exit_code=$(awk -v prop=${prop} -v default_threshold=${myoverlap} '{myexit=0; if(prop < default_threshold){myexit=1}; print myexit }' )
+    if [${exit_code} -gt 0]; then
+    	printf "SNP overlap ${prop} is lower than
+    	exit ${exit_code};
+    fi
     
     
 	>>>
 	
 	output {
 		File snps_to_keep="extract.txt"
-		File subset_bed="~{basename}_admixReady.bed"
-		File subset_bim="~{basename}_admixReady.bim"
-		File subset_fam="~{basename}_admixReady.fam"
-		File subset_log="~{basename}_admixReady.log"
-		File subset_P="~{basename}_admixReady.P"
+		File subset_bed="~{basename}_pcaReady.bed"
+		File subset_bim="~{basename}_pcaReady.bim"
+		File subset_fam="~{basename}_pcaReady.fam"
+		File subset_log="~{basename}_pcaReady.log"
+		File subset_loadings="loadings_pcaReady.txt"
 	}
 	
 	runtime {
@@ -83,17 +90,12 @@ task summary {
 	}
 }
 
-task run_admixture_projected {
+task run_pca_projected {
 	input {
     	File bed
     	File bim
     	File fam
-    	File P
-    	Int k
-    	Int? seed
-    	Boolean cv=false
-    	String mem_gb = "16" #https://github.com/openwdl/wdl/pull/464
-    	Int n_cpus = 4
+    	File loadings
   	}
 
 	Int disk_size = ceil(1.5*(size(bed, "GB") + size(bim, "GB") + size(fam, "GB")))
@@ -101,28 +103,26 @@ task run_admixture_projected {
 	#ln --symbolic ${P} ${basename}.${k}.P.in
 
 	command <<<
-		ln --symbolic ~{P} ~{basename}.~{k}.P.in
-		command="/admixture_linux-1.3.0/admixture ~{if (cv) then "--cv" else ""} ~{if defined(seed) then "-s ~{seed}" else "-s time"} -j~{n_cpus} -P ~{bed} ~{k}"
+		command="/plink2 --bfile ${basename} --score loadings --out ${basename}_pca
 		printf "${command}\n"
-		${command} | tee ~{basename}_projection.~{k}.log
-		#/admixture_linux-1.3.0/admixture ~{if (cv) then "--cv" else ""} ~{if defined(seed) then "-s ~{seed}" else "-s time"} -j~{n_cpus} -P ~{bed} ~{k} | tee ~{basename}_projection.~{k}.log
+		${command}
 	>>>
 
 	runtime {
-		docker: "us.gcr.io/broad-dsde-methods/admixture_docker:v1.0.0"
+		docker: "us.gcr.io/broad-dsde-methods/plink2_docker@sha256:4455bf22ada6769ef00ed0509b278130ed98b6172c91de69b5bc2045a60de124"
 		#disks: "local-disk " + disk_size + " HDD"
 		memory: mem_gb + " GB"
 		cpu: n_cpus
   	}
 
 	output {
-		File ancestry_fractions = "~{basename}.~{k}.Q"
-		File allele_frequencies = "~{basename}.~{k}.P"
-		File admixture_log = "~{basename}_projection.~{k}.log"
+		#check output file name from --score in plink2
+		File pca_projection = "~{basename}_pca.score"
+		File projection_log = "~{basename}_pca.log"
 	}
 }
 
-workflow make_admixReady_projection_admixture_workflow {
+workflow pca_projection {
 	input{
     File ref_loadings
 		File ref_bim
