@@ -6,7 +6,7 @@ task removeRelateds {
 		File bed
 		File bim
 		File fam
-    Float? max_kinship_coefficient
+    		Float? max_kinship_coefficient
 		Int mem_gb = 8
 	}
 
@@ -14,12 +14,17 @@ task removeRelateds {
 	String basename = basename(bed, ".bed")
 	
 	command <<<
-    #make the kinship matrix
-    command="/plink2 --bed ~{bed} --bim ~{bim} --fam ~{fam} --make-king triangle bin --out ref_kin" #this is recommended when accessing the matrix numerous times but may be less efficient here
+    		#make the kinship matrix
+    		command="/plink2 --bed ~{bed} --bim ~{bim} --fam ~{fam} \
+			--make-king triangle bin \  #this is recommended when accessing the matrix numerous times but may be less efficient here
+			--out ref_kin" 
 		printf "${command}\n"
 		${command}
-    #identify individuals who are less related than kinship threshold
-    command="/plink2 --bed ~{bed} --bim ~{bim} --fam ~{fam} --keep-allele-order ~{if defined(max_kinship_coefficient) then "--king-cutoff ref_kin ~{max_kinship_coefficient}" else "--king-cutoff ref_kin 0.0442"} --out ~{basename}"
+
+    		#identify individuals who are less related than kinship threshold
+    		command="/plink2 --bed ~{bed} --bim ~{bim} --fam ~{fam} \
+			~{if defined(max_kinship_coefficient) then "--king-cutoff ref_kin ~{max_kinship_coefficient}" else "--king-cutoff ref_kin 0.0442"} \
+			--out ~{basename}"
 		printf "${command}\n"
 		${command}
 	>>>
@@ -37,7 +42,7 @@ task removeRelateds {
 
 #extract variants in common with some database (don't want to create PC's with SNPs that won't be found in most datasets)
 task extractOverlap {
-  input{
+	input{
 		File ref_bim
 		File bed
 		File bim
@@ -53,7 +58,13 @@ task extractOverlap {
 		awk 'FNR==NR{a[$2]; next}{if($2 in a){print $2}}' ~{ref_bim} ~{bim} > extract.txt
 
 		#subset bed with --extract extract.txt
-		/plink2 --bed ~{bed} --bim ~{bim} --fam ~{fam} --extract extract.txt --make-bed --keep-allele-order --out ~{basename}_overlap
+		command="/plink2 --bed ~{bed} --bim ~{bim} --fam ~{fam} \
+			--keep-allele-order \
+			--extract extract.txt \
+			--make-bed \
+			--out ~{basename}_overlap"
+		printf "${command}\n"
+		${command}
 	>>>
 	
 	output {
@@ -70,9 +81,10 @@ task pruneVars {
 		File bed
 		File bim
 		File fam
-    Int? window_size
-    Int? shift_size
-    Int? r2_threshold
+		File keep_inds
+    		Int? window_size
+    		Int? shift_size
+    		Int? r2_threshold
 		Int mem_gb = 8
 	}
 
@@ -80,8 +92,12 @@ task pruneVars {
 	String basename = basename(bed, ".bed")
 	
 	command <<<
-    #identify individuals who are less related than kinship threshold
-  command="/plink2 --bed ~{bed} --bim ~{bim} --fam ~{fam} --keep-allele-order ~{if defined(window_size, shift_size, r2_threshold) then "--indep-pairwise ~{window_size} ~{shift_size} ~{r2_threshold}" else "--indep-pairwise 10000 1000 0.1"} --out ~{basename}_indep"
+    		#identify individuals who are less related than kinship threshold
+  		command="/plink2 --bed ~{bed} --bim ~{bim} --fam ~{fam} \
+			--keep ind_keep \
+			--keep-allele-order \
+			~{if defined(window_size, shift_size, r2_threshold) then "--indep-pairwise ~{window_size} ~{shift_size} ~{r2_threshold}" else "--indep-pairwise 10000 1000 0.1"} \
+			--out ~{basename}_indep"
 		printf "${command}\n"
 		${command}
 	>>>
@@ -99,25 +115,25 @@ task pruneVars {
 
 task make_pca_loadings {
 	input {
-    File bed
-    File bim
-    File fam
-    File keep_inds
-    File keep_vars
-  }
+    		File bed
+    		File bim
+    		File fam
+    		File keep_inds
+    		File keep_vars
+  	}
 
 	Int disk_size = ceil(1.5*(size(bed, "GB") + size(bim, "GB") + size(fam, "GB")))
 	String basename = basename(bed, ".bed")
 	#ln --symbolic ${P} ${basename}.${k}.P.in
 
 	command <<<
-    command="plink2 --bed ~{bed} --bim ~{bim} --fam ~{fam} \
-      --keep ~{keep_inds} \
-      --extract ~{keep_vars} \
-      --freq counts \
-      --pca allele-wts \
-      --out ~{basename}_snp_loadings"
-    printf "${command}\n"
+    		command="plink2 --bed ~{bed} --bim ~{bim} --fam ~{fam} \
+      			--keep ~{keep_inds} \
+      			--extract ~{keep_vars} \
+      			--freq counts \
+      			--pca allele-wts \
+      			--out ~{basename}_snp_loadings"
+    		printf "${command}\n"
 		${command}
 	>>>
 
@@ -130,8 +146,8 @@ task make_pca_loadings {
 
 	output {
 		#check output file name from --score in plink2
-    File var_freq_counts = "~{basename}_snp_loadings.acount"
-		File snp_loadings = "~{basename}_snp_loadings.eigenvec.allele" #hgdp_tgp_gnomad_pca.eigenvec.allele
+    		File var_freq_counts = "~{basename}_snp_loadings.acount"
+		File snp_loadings = "~{basename}_snp_loadings.eigenvec.allele" 
 		File projection_log = "~{basename}_snp_loadings.log" 
 	}
 }
@@ -139,11 +155,12 @@ task make_pca_loadings {
 #run the reference panel with loadings just created- can take most of this from other workflow
 task run_pca_projected {
 	input {
-    	File bed
-    	File bim
-    	File fam
-    	File loadings
-	File freq_file
+    		File bed
+    		File bim
+    		File fam
+		File keep_vars
+    		File loadings
+		File freq_file
   	}
 
 	Int disk_size = ceil(1.5*(size(bed, "GB") + size(bim, "GB") + size(fam, "GB")))
@@ -153,6 +170,7 @@ task run_pca_projected {
 	command <<<
 		#https://www.cog-genomics.org/plink/2.0/score#pca_project
 		command="/plink2 --bfile ${basename} \
+			--extract ~{keep_vars} \
 			--read-freq ~{freq_file} \
 			--score ~{loadings} 2 5 header-read no-mean-imputation variance-standardize \
        			--score-col-nums 6-15 \
@@ -180,28 +198,60 @@ workflow make_pca_projection {
 		File bed
 		File bim
 		File fam
-    Float max_kinship_coefficient
+		File ref_bim
+   		Float max_kinship_coefficient
+		Int? window_size
+    		Int? shift_size
+    		Int? r2_threshold
 		String? mem_gb
 		Int? n_cpus
 	}
 	
 	call removeRelateds {
 		input:
-      #name in task = name in workflow input
+      			#name in task = name in workflow input
 			bed = bed, 
 			bim = bim, 
 			fam = fam,
-      max_kinship_coefficient = max_kinship_coefficient
+      			max_kinship_coefficient = max_kinship_coefficient
 	}
 
-    #pick back up here.
+	call extractOverlap {
+		input:
+			ref_bim = ref_bim,
+			bed = bed,
+			bim = bim, 
+			fam = fam
+	}
+
+	call pruneVars {
+		input:
+			bed = extractOverlap.bed,
+			bim = extractOverlap.bim,
+			fam = extractOverlap.fam,
+			keep_inds = removeRelateds.subset_keep_inds
+			window_size = window_size
+    			shift_size = shift_size
+    			r2_threshold = r2_threshold
+	}
+
+	call make_pca_loadings {
+		input:
+			bed = bed,
+			bim = bim,
+			fam = fam,
+			keep_inds = removeRelateds.subset_keep_inds,
+			keep_vars = pruntVars.subset_keep_vars
+	}
+
 	call run_pca_projected {
 		input:
 			bed = prepareFiles.subset_bed,
     			bim = prepareFiles.subset_bim,
     			fam = prepareFiles.subset_fam,
-    			loadings = prepareFiles.subset_loadings,
-			freq_file = prepareFiles.subset_freqs,
+			keep_vars = pruntVars.subset_keep_vars,
+    			loadings = make_pca_loadings.subset_loadings,
+			freq_file = make_pca_loadings.subset_freqs,
     			mem_gb = mem_gb,
     			n_cpus = n_cpus
 	}
@@ -209,7 +259,7 @@ workflow make_pca_projection {
 	meta {
     		author: "Jonathan Shortt"
     		email: "jonathan.shortt@cuanschutz.edu"
-    		description: "## run_projected_pca\n This workflow is used to create a pca projection a genetic reference dataset (in plink format, i.e., .bed/.bim/.fam). First, the reference data is pruned for common sites (in TopMED imputation panel, and with MAF >= 0.2), and related individuals are removed. Then pca is run on the dataset (Note: this workflow assumes that variants from both the loadings and test dataset have been previously harmonized such that variants follow the same naming convention, alleles at each site are ordered identically, and variants are sorted)."
+    		description: "## run_projected_pca\n This workflow is used to create a pca projection from a genetic reference dataset (in plink format, i.e., .bed/.bim/.fam). First, the reference data is subsetted to include only sites in common with a provided reference .bim (intended to contain only variants that one would expect to find in all downstream datsets that will be projected using loadings created in this worflow (e.g., a list of common sites that are easily imputed in TOPMed)), and then pruned for linkage equilibrium (after removing related individuals). Then pca is run on the dataset."
 	}
 
 }
