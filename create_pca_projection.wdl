@@ -230,9 +230,9 @@ workflow make_pca_projection {
 			bed = extractOverlap.bed,
 			bim = extractOverlap.bim,
 			fam = extractOverlap.fam,
-			keep_inds = removeRelateds.subset_keep_inds
-			window_size = window_size
-    			shift_size = shift_size
+			keep_inds = removeRelateds.subset_keep_inds,
+			window_size = window_size,
+    			shift_size = shift_size,
     			r2_threshold = r2_threshold
 	}
 
