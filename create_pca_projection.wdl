@@ -73,6 +73,7 @@ task extractOverlap {
 		File subset_bim="~{basename}_overlap.bim"
 		File subset_fam="~{basename}_overlap.fam"
 		File subset_log="~{basename}_overlap.log"
+	}
 }
 
 #prune dataset by linkage
