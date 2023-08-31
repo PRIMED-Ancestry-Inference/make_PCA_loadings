@@ -98,7 +98,7 @@ task pruneVars {
 			--keep ind_keep \
 			--keep-allele-order \
 			#~{if defined(window_size, shift_size, r2_threshold) then "--indep-pairwise ~{window_size} ~{shift_size} ~{r2_threshold}" else "--indep-pairwise 10000 1000 0.1"} \
-			~{if defined(window_size) && defined(shift_size) && defined(r2_threshold) then "--indep-pairwise ~{window_size} ~{shift_size} ~{r2_threshold}" else "--indep-pairwise 10000 1000 0.1"} \
+			~{if (defined(window_size) && defined(shift_size) && defined(r2_threshold)) then "--indep-pairwise ~{window_size} ~{shift_size} ~{r2_threshold}" else "--indep-pairwise 10000 1000 0.1"} \
 			--out ~{basename}_indep"
 		printf "${command}\n"
 		${command}
