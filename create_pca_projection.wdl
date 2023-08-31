@@ -92,7 +92,7 @@ task pruneVars {
 	Float disk_size = ceil(1.5*(size(bed, "GB") + size(bim, "GB") + size(fam, "GB"))) * 1.5	#hoping this works?
 	String basename = basename(bed, ".bed")
 
-	command <<<
+	command<<<
 		command="echo nothing"
 		${command}
 	>>>
