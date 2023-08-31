@@ -229,12 +229,12 @@ workflow make_pca_projection {
 
 	call pruneVars {
 		input:
-			bed = extractOverlap.subset_bed,
-			bim = extractOverlap.subset_bim,
-			fam = extractOverlap.subset_fam,
-			keep_inds = removeRelateds.subset_keep_inds,
-			window_size = window_size,
-    			shift_size = shift_size,
+			#bed = extractOverlap.subset_bed,
+			#bim = extractOverlap.subset_bim,
+			#fam = extractOverlap.subset_fam,
+			#keep_inds = removeRelateds.subset_keep_inds,
+			#window_size = window_size,
+    			#shift_size = shift_size,
     			r2_threshold = r2_threshold
 	}
 
