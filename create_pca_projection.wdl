@@ -80,13 +80,13 @@ task extractOverlap {
 task pruneVars {
 	input{
 		File bed
-		File bim
-		File fam
-		File keep_inds
-		Int? window_size
-		Int? shift_size
-		Int? r2_threshold
-		Int mem_gb = 8
+		#File bim
+		#File fam
+		#File keep_inds
+		#Int? window_size
+		#Int? shift_size
+		#Int? r2_threshold
+		#Int mem_gb = 8
 	}
 
 	Float disk_size = ceil(1.5*(size(bed, "GB") + size(bim, "GB") + size(fam, "GB"))) * 1.5	#hoping this works?
