@@ -2,7 +2,7 @@ version 1.0
 
 #remove related individuals
 task removeRelateds {
-	input{
+	input {
 		File bed
 		File bim
 		File fam
