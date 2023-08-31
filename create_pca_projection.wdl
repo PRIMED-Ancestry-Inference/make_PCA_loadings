@@ -6,7 +6,7 @@ task removeRelateds {
 		File bed
 		File bim
 		File fam
-    		Float? max_kinship_coefficient
+		Float? max_kinship_coefficient
 		Int mem_gb = 8
 	}
 
@@ -83,9 +83,9 @@ task pruneVars {
 		File bim
 		File fam
 		File keep_inds
-    		Int? window_size
-    		Int? shift_size
-    		Int? r2_threshold
+		Int? window_size
+		Int? shift_size
+		Int? r2_threshold
 		Int mem_gb = 8
 	}
 
@@ -116,11 +116,11 @@ task pruneVars {
 
 task make_pca_loadings {
 	input {
-    		File bed
-    		File bim
-    		File fam
-    		File keep_inds
-    		File keep_vars
+		File bed
+		File bim
+		File fam
+		File keep_inds
+		File keep_vars
   	}
 
 	Int disk_size = ceil(1.5*(size(bed, "GB") + size(bim, "GB") + size(fam, "GB")))
@@ -156,11 +156,11 @@ task make_pca_loadings {
 #run the reference panel with loadings just created- can take most of this from other workflow
 task run_pca_projected {
 	input {
-    		File bed
-    		File bim
-    		File fam
+		File bed
+		File bim
+		File fam
 		File keep_vars
-    		File loadings
+		File loadings
 		File freq_file
   	}
 
