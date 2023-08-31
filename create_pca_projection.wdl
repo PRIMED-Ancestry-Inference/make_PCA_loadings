@@ -14,17 +14,17 @@ task removeRelateds {
 	String basename = basename(bed, ".bed")
 	
 	command <<<
-    		#make the kinship matrix
-    		command="/plink2 --bed ~{bed} --bim ~{bim} --fam ~{fam} \
-			--make-king triangle bin \  #this is recommended when accessing the matrix numerous times but may be less efficient here
-			--out ref_kin" 
+		#make the kinship matrix
+		command="/plink2 --bed ~{bed} --bim ~{bim} --fam ~{fam} \
+		--make-king triangle bin \  #this is recommended when accessing the matrix numerous times but may be less efficient here
+		--out ref_kin" 
 		printf "${command}\n"
 		${command}
-
-    		#identify individuals who are less related than kinship threshold
-    		command="/plink2 --bed ~{bed} --bim ~{bim} --fam ~{fam} \
-			~{if defined(max_kinship_coefficient) then "--king-cutoff ref_kin ~{max_kinship_coefficient}" else "--king-cutoff ref_kin 0.0442"} \
-			--out ~{basename}"
+		
+		#identify individuals who are less related than kinship threshold
+		command="/plink2 --bed ~{bed} --bim ~{bim} --fam ~{fam} \
+		~{if defined(max_kinship_coefficient) then "--king-cutoff ref_kin ~{max_kinship_coefficient}" else "--king-cutoff ref_kin 0.0442"} \
+		--out ~{basename}"
 		printf "${command}\n"
 		${command}
 	>>>
