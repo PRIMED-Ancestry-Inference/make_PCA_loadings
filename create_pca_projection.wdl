@@ -227,9 +227,9 @@ workflow make_pca_projection {
 
 	call pruneVars {
 		input:
-			bed = extractOverlap.bed,
-			bim = extractOverlap.bim,
-			fam = extractOverlap.fam,
+			bed = extractOverlap.subset_bed,
+			bim = extractOverlap.subset_bim,
+			fam = extractOverlap.subset_fam,
 			keep_inds = removeRelateds.subset_keep_inds,
 			window_size = window_size,
     			shift_size = shift_size,
@@ -242,15 +242,15 @@ workflow make_pca_projection {
 			bim = bim,
 			fam = fam,
 			keep_inds = removeRelateds.subset_keep_inds,
-			keep_vars = pruntVars.subset_keep_vars
+			keep_vars = pruneVars.subset_keep_vars
 	}
 
 	call run_pca_projected {
 		input:
-			bed = prepareFiles.subset_bed,
-    			bim = prepareFiles.subset_bim,
-    			fam = prepareFiles.subset_fam,
-			keep_vars = pruntVars.subset_keep_vars,
+			bed = extractOverlap.subset_bed, #might be able to just send the original .bed file here
+    			bim = extractOverlap.subset_bim,
+    			fam = extractOverlap.subset_fam,
+			keep_vars = pruneVars.subset_keep_vars,
     			loadings = make_pca_loadings.subset_loadings,
 			freq_file = make_pca_loadings.subset_freqs,
     			mem_gb = mem_gb,
