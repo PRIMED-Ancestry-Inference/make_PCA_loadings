@@ -99,7 +99,8 @@ task pruneVars {
 	
 	command <<<
 		#identify individuals who are less related than kinship threshold
-		command="/plink2 --bed ~{bed} --bim ~{bim} --fam ~{fam} \
+		command="echo nothing"
+#		command="/plink2 --bed ~{bed} --bim ~{bim} --fam ~{fam} \
 #			--keep ~{keep_inds} \
 #			--keep-allele-order \
 			#~{if defined(window_size, shift_size, r2_threshold) then "--indep-pairwise ~{window_size} ~{shift_size} ~{r2_threshold}" else "--indep-pairwise 10000 1000 0.1"} \
