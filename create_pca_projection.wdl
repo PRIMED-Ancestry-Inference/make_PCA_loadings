@@ -91,16 +91,14 @@ task pruneVars {
 
 	Float disk_size = ceil(1.5*(size(bed, "GB") + size(bim, "GB") + size(fam, "GB"))) * 1.5	#hoping this works?
 	String basename = basename(bed, ".bed")
-
-#	command <<<
-#		command="echo nothing"
-#		${command}
-#	>>>
 	
 	command <<<
-#		command="echo nothing"
-		command="/plink2 --bed ~{bed} --bim ~{bim} --fam ~{fam} --keep ~{keep_inds} --keep-allele-order --indep-pairwise ~{if defined(window_size) then "~{window_size} ~{shift_size} ~{r2_threshold}" else "10000 1000 0.1"} --out ~{basename}_indep"
-#		printf "${command}\n"
+		command="/plink2 --bed ~{bed} --bim ~{bim} --fam ~{fam} \
+			--keep ~{keep_inds} \
+			--keep-allele-order \
+			--indep-pairwise ~{if defined(window_size) then "~{window_size} ~{shift_size} ~{r2_threshold}" else "10000 1000 0.1"} \
+			--out ~{basename}_indep"
+		printf "${command}\n"
 		${command}
 	>>>
 
