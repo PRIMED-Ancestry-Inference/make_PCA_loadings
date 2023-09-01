@@ -258,7 +258,7 @@ workflow make_pca_projection {
 			bim = extractOverlap.subset_bim,
 			fam = extractOverlap.subset_fam,
 			keep_vars = pruneVars.subset_keep_vars,
-			loadings = make_pca_loadings.subset_loadings,
+			loadings = make_pca_loadings.snp_loadings,
 			freq_file = make_pca_loadings.var_freq_counts,
 			mem_gb = mem_gb,
 			n_cpus = n_cpus
