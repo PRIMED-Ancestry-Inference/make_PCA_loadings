@@ -99,7 +99,7 @@ task pruneVars {
 	
 	command <<<
 #		command="echo nothing"
-#		command="/plink2 --bed ~{bed} --bim ~{bim} --fam ~{fam} --keep ~{keep_inds} --keep-allele-order --indep-pairwise ~{if defined(window_size) then "~{window_size} ~{shift_size} ~{r2_threshold}" else "10000 1000 0.1"} --out ~{basename}_indep"
+		command="/plink2 --bed ~{bed} --bim ~{bim} --fam ~{fam} --keep ~{keep_inds} --keep-allele-order --indep-pairwise ~{if defined(window_size) then "~{window_size} ~{shift_size} ~{r2_threshold}" else "10000 1000 0.1"} --out ~{basename}_indep"
 #		printf "${command}\n"
 		${command}
 	>>>
