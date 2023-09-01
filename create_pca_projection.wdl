@@ -80,35 +80,35 @@ task extractOverlap {
 task pruneVars {
 	input{
 		File bed
-		#File bim
-		#File fam
-		#File keep_inds
-		#Int? window_size
-		#Int? shift_size
-		#Int? r2_threshold
-		#Int mem_gb = 8
+		File bim
+		File fam
+		File keep_inds
+		Int? window_size
+		Int? shift_size
+		Int? r2_threshold
+		Int mem_gb = 8
 	}
 
 	Float disk_size = ceil(1.5*(size(bed, "GB") + size(bim, "GB") + size(fam, "GB"))) * 1.5	#hoping this works?
 	String basename = basename(bed, ".bed")
 
+#	command <<<
+#		command="echo nothing"
+#		${command}
+#	>>>
+	
 	command <<<
-		command="echo nothing"
+		#identify individuals who are less related than kinship threshold
+		command="/plink2 --bed ~{bed} --bim ~{bim} --fam ~{fam} \
+			--keep ind_keep \
+			--keep-allele-order \
+			#~{if defined(window_size, shift_size, r2_threshold) then "--indep-pairwise ~{window_size} ~{shift_size} ~{r2_threshold}" else "--indep-pairwise 10000 1000 0.1"} \
+			#~{if (defined(window_size) && defined(shift_size) && defined(r2_threshold)) then "--indep-pairwise ~{window_size} ~{shift_size} ~{r2_threshold}" else "--indep-pairwise 10000 1000 0.1"} \
+			~{if defined(window_size) then "--indep-pairwise ~{window_size} ~{shift_size} ~{r2_threshold}" else "--indep-pairwise 10000 1000 0.1"} \
+			--out ~{basename}_indep"
+		printf "${command}\n"
 		${command}
 	>>>
-	
-#command <<<
-##identify individuals who are less related than kinship threshold
-#command="/plink2 --bed ~{bed} --bim ~{bim} --fam ~{fam} \
-#--keep ind_keep \
-#--keep-allele-order \
-##~{if defined(window_size, shift_size, r2_threshold) then "--indep-pairwise ~{window_size} ~{shift_size} ~{r2_threshold}" else "--indep-pairwise 10000 1000 0.1"} \
-##~{if (defined(window_size) && defined(shift_size) && defined(r2_threshold)) then "--indep-pairwise ~{window_size} ~{shift_size} ~{r2_threshold}" else "--indep-pairwise 10000 1000 0.1"} \
-#~{if defined(window_size) then "--indep-pairwise ~{window_size} ~{shift_size} ~{r2_threshold}" else "--indep-pairwise 10000 1000 0.1"} \
-#--out ~{basename}_indep"
-#printf "${command}\n"
-#${command}
-#>>>
 
 	output {
 		File subset_keep_vars="~{basename}_indep.prune.in"
