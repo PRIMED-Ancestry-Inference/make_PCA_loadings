@@ -14,9 +14,9 @@ task removeRelateds {
 	String basename = basename(bed, ".bed")
 
 	command <<<
-		#make the kinship matrix
+		#make the kinship matrix- #this is recommended when accessing the matrix numerous times but may be less efficient here
 		command="/plink2 --bed ~{bed} --bim ~{bim} --fam ~{fam} \
-		--make-king triangle bin \  #this is recommended when accessing the matrix numerous times but may be less efficient here
+		--make-king triangle bin \
 		--out ref_kin"
 		printf "${command}\n"
 		${command}
