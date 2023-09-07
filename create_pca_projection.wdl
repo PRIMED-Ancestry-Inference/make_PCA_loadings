@@ -133,7 +133,7 @@ task make_pca_loadings {
 	#ln --symbolic ${P} ${basename}.${k}.P.in
 
 	command <<<
-		command="plink2 --bed ~{bed} --bim ~{bim} --fam ~{fam} \
+		command="/plink2 --bed ~{bed} --bim ~{bim} --fam ~{fam} \
 			--keep ~{keep_inds} \
 			--extract ~{keep_vars} \
 			--freq counts \
